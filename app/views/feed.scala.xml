@@ -1,0 +1,25 @@
+@import util.SwapScraper.Listing
+
+@(listings: Seq[Listing])
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+<channel>
+    <title>UW SWAP Online Auction</title>
+    <link>https://swapauction.wisc.edu/</link>
+    <description>UW SWAP Online Auction</description>
+
+    @for(listing <- listings) {
+    <item>
+        <title>@listing.title</title>
+        <guid isPermalink="false">@listing.id</guid>
+        <link>@listing.link</link>
+        <description>@listing.title - @listing.subtitle</description>
+        @* TODO <pubDate> *@
+        <enclousure url="@listing.thumbnail" />
+    </item>
+    }
+</channel>
+
+</rss>
