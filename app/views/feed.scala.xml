@@ -15,9 +15,8 @@
         <title>@listing.title</title>
         <guid isPermalink="false">@listing.id</guid>
         <link>@listing.link</link>
-        <description>@listing.title - @listing.subtitle</description>
+        <description><![CDATA[@listing.subtitle<br /><img src="@listing.thumbnail" alt="thumbnail" />]]></description>
         @* TODO <pubDate> *@
-        <enclousure url="@listing.thumbnail" />
     </item>
     }
 </channel>
