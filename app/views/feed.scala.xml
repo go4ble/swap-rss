@@ -18,7 +18,7 @@
         <link>@listing.link</link>
         <description><![CDATA[<p>@listing.subtitle</p><p><img src="@listing.thumbnail" alt="thumbnail" /></p>]]></description>
         @for(endTime <- listing.endTime) {
-        <pubDate>@endTime.format(DateTimeFormatter.ofPattern("E, dd MMM y hh:mm a"))</pubDate>
+        <pubDate>@endTime</pubDate>
         }
     </item>
     }

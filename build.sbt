@@ -20,8 +20,13 @@ libraryDependencies ++= Seq(
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "io.github.go4ble.binders._"
 
-dockerBaseImage := "openjdk:11"
+import com.typesafe.sbt.packager.docker._
+dockerBaseImage := "eclipse-temurin:11-jre-alpine"
 dockerRepository := Some("ghcr.io/go4ble")
 dockerExposedPorts := Seq(9000)
 dockerUpdateLatest := true
-javaOptions += "-Dpidfile.path=/dev/null"
+dockerCommands := {
+  // Update docker commands to install bash right before existing final RUN command
+  val insertAt = dockerCommands.value.lastIndexWhere(_.makeContent.startsWith("RUN"))
+  dockerCommands.value.patch(insertAt, Seq(Cmd("RUN", "apk", "add", "bash")), 0)
+}
