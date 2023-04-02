@@ -1,6 +1,6 @@
 @import util.SwapScraper.Listing
 
-@import java.time.format.DateTimeFormatter
+@import java.time.ZoneId
 @(listings: Seq[Listing])
 
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -18,7 +18,7 @@
         <link>@listing.link</link>
         <description><![CDATA[<p>@listing.subtitle</p><p><img src="@listing.thumbnail" alt="thumbnail" /></p>]]></description>
         @for(endTime <- listing.endTime) {
-        <updated>@endTime</updated>
+        <pubDate>@endTime.atZone(ZoneId.of("America/Chicago")).toOffsetDateTime</pubDate>
         }
     </item>
     }
