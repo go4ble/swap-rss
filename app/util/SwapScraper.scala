@@ -22,7 +22,7 @@ object SwapScraper {
   private val EndTimeAttribute = "data-action-time"
   private val EndTimeFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss")
 
-  case class Listing(id: String, title: String, subtitle: String, link: URL, thumbnail: URL, endTime: Option[LocalDateTime])
+  case class Listing(id: String, title: String, subtitle: String, link: URL, thumbnail: String, endTime: Option[LocalDateTime])
 
   object Listing {
     def apply(element: Element): Listing = {
@@ -30,7 +30,7 @@ object SwapScraper {
       val title = element.select(".title").text()
       val subtitle = element.select(".subtitle").text()
       val link = new URL(element.select(".bids > a").last().absUrl("href"))
-      val thumbnail = new URL(element.select("img").first().absUrl("src"))
+      val thumbnail = element.select("img").first().absUrl("src")
       val endTimeStr = element.getElementsByAttribute(EndTimeAttribute).attr(EndTimeAttribute)
       val endTime = Try(LocalDateTime.parse(endTimeStr, EndTimeFormat)).toOption
       Listing(id, title, subtitle, link, thumbnail, endTime)
