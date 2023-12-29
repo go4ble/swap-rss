@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  selenium:
+    image: selenium/standalone-chrome:120.0
+    environment:
+      SE_VNC_NO_PASSWORD: '1'
+    ports:
+      - 4444:4444 # web driver
+      - 7900:7900 # http (vnc)
+      - 5900:5900 # vnc
+    shm_size: 2g
+
+  app:
+    image: ghcr.io/go4ble/swap-rss:latest
+    environment:
+      SELENIUM_REMOTE_WEB_DRIVER_URL: http://selenium:4444
+    ports:
+      - 9000:9000
