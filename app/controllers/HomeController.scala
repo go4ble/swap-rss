@@ -10,7 +10,7 @@ import javax.inject._
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
+class HomeController @Inject()(val controllerComponents: ControllerComponents, swapScraper: SwapScraper) extends BaseController {
 
   /**
    * Create an Action to render an HTML page.
@@ -26,6 +26,6 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   }
 
   def feed(): Action[AnyContent] = Action {
-    Ok(views.xml.feed(SwapScraper.getListings))
+    Ok(views.xml.feed(swapScraper.getListings))
   }
 }

@@ -1,20 +1,32 @@
 package util
 
-import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
-import org.openqa.selenium.{By, WebElement}
+import org.openqa.selenium.remote.RemoteWebDriver
+import org.openqa.selenium.{By, JavascriptExecutor, WebElement}
+import play.api.inject.Injector
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 import scala.jdk.CollectionConverters._
 import scala.util.Try
+
+class SwapScraper @Inject()(injector: Injector) {
+  def getListings: Seq[SwapScraper.Listing] = {
+    val driver = injector.instanceOf[RemoteWebDriver]
+    try {
+      driver.get(SwapScraper.StartingUrl)
+      SwapScraper.getListingElements(driver)
+    } finally {
+      driver.quit()
+    }
+  }
+}
 
 object SwapScraper {
   private val StartingUrl = "https://swapauction.wisc.edu/Browse?ViewStyle=list&ListingType=Auction,FixedPrice&StatusFilter=active_only&SortFilterOptions=1"
   private val ListingIdAttribute = "data-listingid"
   private val EndTimeAttribute = "data-action-time"
   private val EndTimeFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss")
-
-  private val ExecuteHeadless = true
 
   case class Listing(id: String, title: String, subtitle: String, link: String, thumbnail: String, endTime: Option[LocalDateTime])
 
@@ -34,23 +46,11 @@ object SwapScraper {
     }
   }
 
-  def getListings: Seq[Listing] = {
-    val options = new ChromeOptions
-    if (ExecuteHeadless) options.addArguments("--headless=new")
-    val driver = new ChromeDriver(options)
-    try {
-      driver.get(StartingUrl)
-      getListingElements(driver)
-    } finally {
-      driver.quit()
-    }
-  }
-
-  private def getListingElements(driver: ChromeDriver): Seq[Listing] = {
+  private def getListingElements(driver: RemoteWebDriver): Seq[Listing] = {
     val listingElements = driver.findElements(By.cssSelector(s"[$ListingIdAttribute]"))
     val nextPage = driver.findElement(By.cssSelector("ul.pagination > li:last-child"))
     val results = listingElements.asScala.toSeq.map { element =>
-      if (!ExecuteHeadless) driver.executeScript("arguments[0].scrollIntoView(true);", element)
+      driver.executeScript("arguments[0].scrollIntoView(true)", element)
       Listing(element)
     }
     if (nextPage.getAttribute("class").split(" ").contains("disabled")) {
