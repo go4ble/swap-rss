@@ -11,7 +11,7 @@ libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
 
 libraryDependencies ++= Seq(
-  "org.jsoup" % "jsoup" % "1.15.3"
+  "org.seleniumhq.selenium" % "selenium-java" % "4.16.1"
 )
 
 // Adds additional packages into Twirl
