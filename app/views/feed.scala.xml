@@ -1,4 +1,4 @@
-@import util.SwapScraper.Listing
+@import scrapers.SwapScraper.Listing
 
 @import java.time.ZoneId
 @(listings: Seq[Listing])

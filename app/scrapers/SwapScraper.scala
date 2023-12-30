@@ -1,15 +1,16 @@
-package util
+package scrapers
 
 import org.openqa.selenium.remote.RemoteWebDriver
-import org.openqa.selenium.{By, JavascriptExecutor, WebElement}
+import org.openqa.selenium.{By, WebElement}
 import play.api.inject.Injector
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.jdk.CollectionConverters._
 import scala.util.Try
 
+@Singleton
 class SwapScraper @Inject()(injector: Injector) {
   def getListings: Seq[SwapScraper.Listing] = {
     val driver = injector.instanceOf[RemoteWebDriver]

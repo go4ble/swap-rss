@@ -1,0 +1,24 @@
+@import scrapers.usps.MailpieceScraper.Mailpiece
+
+@import java.time.ZoneId
+@(mailpieces: Seq[Mailpiece])
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+    <channel>
+        <title>USPS Informed Delivery</title>
+        <link>https://www.usps.com/manage/informed-delivery.htm</link>
+        <description>USPS Informed Delivery</description>
+
+        @for(mailpiece <- mailpieces) {
+        <item>
+            <title>@mailpiece.id</title>
+            <guid isPermalink="false">@mailpiece.id</guid>
+            <description><![CDATA[<p><img src="@mailpiece.base64EncodedImage" alt="image of mail"></p>]]></description>
+            <pubDate>@mailpiece.deliveryDate</pubDate>
+        </item>
+        }
+    </channel>
+
+</rss>

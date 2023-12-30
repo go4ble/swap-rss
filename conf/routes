@@ -8,5 +8,9 @@
 
 GET  /feed    controllers.HomeController.feed()
 
+GET /feeds/swap              controllers.HomeController.feed()
+GET /feeds/usps/mailpieces   controllers.HomeController.uspsMailpieces()
+GET /feeds/usps/packages     controllers.HomeController.TODO
+
 # Map static resources from the /public folder to the /assets URL path
 # GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

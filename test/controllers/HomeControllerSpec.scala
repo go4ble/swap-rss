@@ -2,9 +2,10 @@ package controllers
 
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
-import play.api.test._
 import play.api.test.Helpers._
-import util.SwapScraper
+import play.api.test._
+import scrapers.SwapScraper
+import scrapers.usps.MailpieceScraper
 
 /**
  * Add your spec here.
@@ -19,12 +20,13 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
 
     "render the index page from a new instance of controller" in {
       val swapScraperStub = new SwapScraper(null)
-      val controller = new HomeController(stubControllerComponents(), swapScraperStub)
+      val uspsMailpieceScraperStub = new MailpieceScraper(null, null)
+      val controller = new HomeController(stubControllerComponents(), swapScraperStub, uspsMailpieceScraperStub)
       val home = controller.index().apply(FakeRequest(GET, "/"))
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentAsString(home) must include("Welcome to Play")
     }
 
     "render the index page from the application" in {
@@ -33,7 +35,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentAsString(home) must include("Welcome to Play")
     }
 
     "render the index page from the router" in {
@@ -42,7 +44,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentAsString(home) must include("Welcome to Play")
     }
   }
 }

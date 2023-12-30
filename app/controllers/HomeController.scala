@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc._
-import util.SwapScraper
+import scrapers.{SwapScraper, usps}
 
 import javax.inject._
 
@@ -10,7 +10,10 @@ import javax.inject._
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents, swapScraper: SwapScraper) extends BaseController {
+class HomeController @Inject()(val controllerComponents: ControllerComponents,
+                               swapScraper: SwapScraper,
+                               mailpieceScraper: usps.MailpieceScraper
+                              ) extends BaseController {
 
   /**
    * Create an Action to render an HTML page.
@@ -20,12 +23,14 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, s
    * a path of `/`.
    */
   def index(): Action[AnyContent] = Action {
-//    val listings = SwapScraper.getListings()
-//    println(listings.head)
     NotFound
   }
 
   def feed(): Action[AnyContent] = Action {
     Ok(views.xml.feed(swapScraper.getListings))
+  }
+
+  def uspsMailpieces(): Action[AnyContent] = Action {
+    Ok(views.xml.usps.mailpieces(mailpieceScraper.getMailpieces))
   }
 }
