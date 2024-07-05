@@ -8,18 +8,18 @@ import scrapers.SwapScraper
 import scrapers.usps.MailpieceScraper
 
 /**
- * Add your spec here.
- * You can mock out a whole application including requests, plugins etc.
- *
- * For more information, see https://www.playframework.com/documentation/latest/ScalaTestingWithScalaTest
- */
+  * Add your spec here.
+  * You can mock out a whole application including requests, plugins etc.
+  *
+  * For more information, see https://www.playframework.com/documentation/latest/ScalaTestingWithScalaTest
+  */
 class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting {
 
   "HomeController GET" should {
     pending
 
     "render the index page from a new instance of controller" in {
-      val swapScraperStub = new SwapScraper(null)
+      val swapScraperStub = new SwapScraper(null)(null)
       val uspsMailpieceScraperStub = new MailpieceScraper(null, null)
       val controller = new HomeController(stubControllerComponents(), swapScraperStub, uspsMailpieceScraperStub)
       val home = controller.index().apply(FakeRequest(GET, "/"))

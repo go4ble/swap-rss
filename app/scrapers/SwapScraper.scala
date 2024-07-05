@@ -1,5 +1,8 @@
 package scrapers
 
+import akka.NotUsed
+import akka.stream.OverflowStrategy
+import akka.stream.scaladsl.{Source, SourceQueueWithComplete}
 import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.{By, WebElement}
 import play.api.inject.Injector
@@ -7,20 +10,18 @@ import play.api.inject.Injector
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
-import scala.jdk.CollectionConverters._
-import scala.util.Try
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
-class SwapScraper @Inject()(injector: Injector) {
-  def getListings: Seq[SwapScraper.Listing] = {
-    val driver = injector.instanceOf[RemoteWebDriver]
-    try {
+class SwapScraper @Inject() (injector: Injector)(implicit ec: ExecutionContext) {
+  def getListings: Source[SwapScraper.Listing, _] =
+    Source.queue(1000, OverflowStrategy.fail).mapMaterializedValue { queue: SourceQueueWithComplete[SwapScraper.Listing] =>
+      val driver = injector.instanceOf[RemoteWebDriver]
       driver.get(SwapScraper.StartingUrl)
-      SwapScraper.getListingElements(driver)
-    } finally {
-      driver.quit()
+      SwapScraper.scrapeListingElements(driver, queue)
+      NotUsed
     }
-  }
 }
 
 object SwapScraper {
@@ -47,18 +48,28 @@ object SwapScraper {
     }
   }
 
-  private def getListingElements(driver: RemoteWebDriver): Seq[Listing] = {
-    val listingElements = driver.findElements(By.cssSelector(s"[$ListingIdAttribute]"))
-    val nextPage = driver.findElement(By.cssSelector("ul.pagination > li:last-child"))
-    val results = listingElements.asScala.toSeq.map { element =>
-      driver.executeScript("arguments[0].scrollIntoView(true)", element)
-      Listing(element)
-    }
-    if (nextPage.getAttribute("class").split(" ").contains("disabled")) {
-      results
-    } else {
-      nextPage.findElement(By.tagName("a")).click()
-      results ++ getListingElements(driver)
+  private def scrapeListingElements(driver: RemoteWebDriver, queue: SourceQueueWithComplete[Listing])(implicit ec: ExecutionContext): Future[Unit] = {
+    Future {
+      val listingElements = driver.findElements(By.cssSelector(s"[$ListingIdAttribute]"))
+      listingElements.forEach { element =>
+        driver.executeScript("arguments[0].scrollIntoView(true)", element)
+        queue.offer(Listing(element))
+      }
+    }.transformWith {
+      case Success(_) =>
+        val nextPage = driver.findElement(By.cssSelector("ul.pagination > li:last-child"))
+        if (nextPage.getAttribute("class").split(" ").contains("disabled")) {
+          Future.successful {
+            queue.complete()
+            driver.close()
+          }
+        } else {
+          nextPage.findElement(By.tagName("a")).click()
+          scrapeListingElements(driver, queue)
+        }
+      case Failure(exception) =>
+        queue.fail(exception)
+        Future.failed(exception)
     }
   }
 }
