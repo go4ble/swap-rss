@@ -9,7 +9,6 @@ import scrapers.{SwapScraper, usps}
 
 import java.time.ZoneId
 import javax.inject._
-import scala.xml.NodeSeq
 
 /**
   * This controller creates an `Action` to handle HTTP requests to the
@@ -36,13 +35,14 @@ class HomeController @Inject() (val controllerComponents: ControllerComponents, 
       val start = Source.single(SwapStart)
 
       val items = swapScraper.getListings.map { listing =>
+        val description = s"""<p>${listing.subtitle}</p><p><img src="${listing.thumbnail}" alt="thumbnail" /></p>"""
         ByteString(
           <item>
               <title>{listing.title}</title>
               <guid isPermalink="false">{listing.id}</guid>
               <link>{listing.link}</link>
-              <description><![CDATA[<p>{listing.subtitle}</p><p><img src="{listing.thumbnail}" alt="thumbnail" /></p>]]></description>
-              {listing.endTime.fold(NodeSeq.Empty)(endTime => <pubDate>{endTime.atZone(ZoneId.of("US/Central")).toOffsetDateTime}</pubDate>)}
+              <description>{xml.PCData(description)}</description>
+              {listing.endTime.fold(xml.NodeSeq.Empty)(endTime => <pubDate>{endTime.atZone(ZoneId.of("US/Central")).toOffsetDateTime}</pubDate>)}
           </item>.toString()
         )
       }
